@@ -1,6 +1,9 @@
 {
   "name": "Habit Tracker",
-  "short_name": "Habits",
+  "short_name": "Habit Tracker",
+  "id": "/habit-tracker/",
+  "start_url": "/habit-tracker/",
+  "scope": "/habit-tracker/",
   "icons": [
     {
       "src": "android-chrome-192x192.png",
