@@ -31,14 +31,14 @@ export default function HabitList({
                   {habit.name}
                 </p>
                 <span className="text-amber-400">
-                  🔥{" "}
+                  🔥
                   {
                     habit.history.filter((day) =>
                       // Only count days in the habit's history that are in the currently displayed month
                       // Checks if dateKey YYYY-MM for first day of month = day in habit.history
                       day.startsWith(toDateKey(1).slice(0, 7)),
                     ).length
-                  }{" "}
+                  }
                   /{daysInMonth}
                 </span>
               </div>
