@@ -5,6 +5,10 @@ export default function HabitList({
   onDeleteHabit,
   onToggleDaySelection,
 }) {
+  function toDateKey(day) {
+    return new Date(year, month, day).toISOString().slice(0, 10);
+  }
+
   const firstDayOfMonth = new Date(year, month).getDay();
   const daysToAdd = firstDayOfMonth;
   {
@@ -30,9 +34,9 @@ export default function HabitList({
                   🔥{" "}
                   {
                     habit.history.filter((day) =>
-                      day.startsWith(
-                        `${year}-${(month + 1).toString().padStart(2, "0")}`,
-                      ),
+                      // Only count days in the habit's history that are in the currently displayed month
+                      // Checks if dateKey YYYY-MM for first day of month = day in habit.history
+                      day.startsWith(toDateKey(1).slice(0, 7)),
                     ).length
                   }{" "}
                   /{daysInMonth}
@@ -55,19 +59,13 @@ export default function HabitList({
               ))}
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
                 (day) => {
-                  // Create a dateKey in the format "YYYY-MM-DD" for the current day
-                  // Pad month and day with leading zeros if necessary
-                  // month is zero-indexed, so we add 1 before converting to string
-                  const monthString = (month + 1).toString().padStart(2, "0");
-                  const dayString = day.toString().padStart(2, "0");
-                  const dateKey = `${year}-${monthString}-${dayString}`;
+                  const dateKey = toDateKey(day);
                   const isSelected = habit.history.includes(dateKey);
 
                   return (
                     <button
                       key={day}
                       onClick={() => {
-                        const dateKey = `${year}-${monthString}-${dayString}`;
                         onToggleDaySelection(habit.id, dateKey);
                       }}
                       className={
