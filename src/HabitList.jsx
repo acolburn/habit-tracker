@@ -27,7 +27,15 @@ export default function HabitList({
                   {habit.name}
                 </p>
                 <span className="text-amber-400">
-                  🔥 {habit.history.length} /{daysInMonth}
+                  🔥{" "}
+                  {
+                    habit.history.filter((day) =>
+                      day.startsWith(
+                        `${year}-${(month + 1).toString().padStart(2, "0")}`,
+                      ),
+                    ).length
+                  }{" "}
+                  /{daysInMonth}
                 </span>
               </div>
 
