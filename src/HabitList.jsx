@@ -47,14 +47,19 @@ export default function HabitList({
               ))}
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
                 (day) => {
-                  const dateKey = `${year}-${month}-${day}`;
+                  // Create a dateKey in the format "YYYY-MM-DD" for the current day
+                  // Pad month and day with leading zeros if necessary
+                  // month is zero-indexed, so we add 1 before converting to string
+                  const monthString = (month + 1).toString().padStart(2, "0");
+                  const dayString = day.toString().padStart(2, "0");
+                  const dateKey = `${year}-${monthString}-${dayString}`;
                   const isSelected = habit.history.includes(dateKey);
 
                   return (
                     <button
                       key={day}
                       onClick={() => {
-                        const dateKey = `${year}-${month}-${day}`;
+                        const dateKey = `${year}-${monthString}-${dayString}`;
                         onToggleDaySelection(habit.id, dateKey);
                       }}
                       className={
