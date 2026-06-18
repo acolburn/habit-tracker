@@ -27,7 +27,11 @@ function App() {
   const [habits, setHabits] = useState(() => {
     const savedHabits = localStorage.getItem("habitTrackerHabits");
     if (savedHabits) {
-      return JSON.parse(savedHabits);
+      try {
+        return JSON.parse(savedHabits);
+      } catch (error) {
+        console.error("Error parsing saved habits:", error);
+      }
     }
     return [];
   });
