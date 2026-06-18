@@ -18,6 +18,10 @@ const monthNames = [
   "December",
 ];
 
+function createHabitId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 function App() {
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
@@ -42,7 +46,7 @@ function App() {
 
   function onAddHabit(habitName) {
     const newHabit = {
-      id: crypto.randomUUID(),
+      id: createHabitId(),
       name: habitName,
       history: [],
     };
