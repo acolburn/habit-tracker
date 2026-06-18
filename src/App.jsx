@@ -36,13 +36,6 @@ function App() {
     return [];
   });
 
-  // useEffect(() => {
-  //   const savedHabits = localStorage.getItem("habitTrackerHabits");
-  //   if (savedHabits) {
-  //     setHabits(JSON.parse(savedHabits));
-  //   }
-  // }, []);
-
   useEffect(() => {
     localStorage.setItem("habitTrackerHabits", JSON.stringify(habits));
   }, [habits]);

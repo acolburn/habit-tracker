@@ -6,14 +6,13 @@ export default function HabitList({
   onToggleDaySelection,
 }) {
   function toDateKey(day) {
-    return new Date(year, month, day).toISOString().slice(0, 10);
+    const monthString = String(month + 1).padStart(2, "0"); // month is 0-indexed, so add 1
+    const dayString = String(day).padStart(2, "0");
+    return `${year}-${monthString}-${dayString}`;
   }
 
   const firstDayOfMonth = new Date(year, month).getDay();
   const daysToAdd = firstDayOfMonth;
-  {
-    /*Sun=0, Mon=1, etc.*/
-  }
   // Get the first day of the next month, then extract its day number
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
