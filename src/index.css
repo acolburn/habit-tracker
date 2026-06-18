@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+body {
+  background-color: var(--color-zinc-900);
+  color: var(--color-zinc-100);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
