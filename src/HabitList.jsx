@@ -11,6 +11,57 @@ export default function HabitList({
     return `${year}-${monthString}-${dayString}`;
   }
 
+  // parseDateKey and formatDateKey are used for calculating streaks, which require
+  // working with Date objects. The rest of the app uses date keys as strings;
+  // these functions convert back and forth between the two formats.
+
+  // Stored history keys are "YYYY-MM-DD"; split into numeric year/month/day parts.
+  // Return a Date object for that date.
+  function parseDateKey(dateKey) {
+    const [yearPart, monthPart, dayPart] = dateKey.split("-").map(Number);
+
+    // Use the numeric Date constructor so this stays in local time.
+    // Month is 0-indexed in JS Date, so subtract 1.
+    return new Date(yearPart, monthPart - 1, dayPart);
+  }
+
+  // Convert a Date object back into the stored "YYYY-MM-DD" history key format.
+  function formatDateKey(date) {
+    const yearPart = date.getFullYear();
+
+    // getMonth() is 0-indexed, so add 1 and pad to 2 digits.
+    const monthPart = String(date.getMonth() + 1).padStart(2, "0");
+
+    // Pad day to 2 digits so keys stay lexically consistent.
+    const dayPart = String(date.getDate()).padStart(2, "0");
+
+    return `${yearPart}-${monthPart}-${dayPart}`;
+  }
+
+  // Current streak means consecutive days up to today:
+  // count today if selected, otherwise start from yesterday.
+  function calculateCurrentStreak(history) {
+    const historySet = new Set(history);
+    const todayKey = formatDateKey(new Date());
+    const hasToday = historySet.has(todayKey);
+
+    // Build the starting date from a key so we can safely move backward by days.
+    const cursorDate = parseDateKey(todayKey);
+    if (!hasToday) {
+      cursorDate.setDate(cursorDate.getDate() - 1);
+    }
+
+    let streakLength = 0;
+
+    // Walk backward one day at a time until a date is missing from history.
+    while (historySet.has(formatDateKey(cursorDate))) {
+      streakLength += 1;
+      cursorDate.setDate(cursorDate.getDate() - 1);
+    }
+
+    return streakLength;
+  }
+
   const firstDayOfMonth = new Date(year, month).getDay();
   const daysToAdd = firstDayOfMonth;
   // Get the first day of the next month, then extract its day number
@@ -26,30 +77,34 @@ export default function HabitList({
           const monthlyActivityCount = habit.history.filter((day) =>
             day.startsWith(monthPrefix),
           ).length;
+          const currentStreak = calculateCurrentStreak(habit.history);
 
           return (
             <div key={habit.id}>
               {/* Title and Delete Button */}
-              <div className="flex items-center justify-between rounded-xl bg-zinc-800/60 py-2">
+              <div className="flex items-center justify-between rounded-xl bg-zinc-800/60 py-1">
                 <div>
                   <p className="font-semibold text-xl text-zinc-100">
                     {habit.name}
                   </p>
-                  <span className="text-amber-400">
-                    🔥
-                    {monthlyActivityCount}/{daysInMonth}
-                  </span>
                 </div>
 
                 <button
                   onClick={() => {
-                    onDeleteHabit(habit.id); // Call the onDeleteHabit function to handle any additional logic
-                  }}
+                    onDeleteHabit(habit.id);
+                  }} // Call the onDeleteHabit function to handle any additional logic
                   className="rounded bg-red-800 px-3 py-1 text-sm hover:bg-red-700"
                 >
                   Delete
                 </button>
               </div>
+              <div className="flex gap-4 items-center justify-between text-amber-400 pb-2">
+                <span>
+                  {`This month: ${monthlyActivityCount}/${daysInMonth}`}
+                </span>
+                <span> Streak: 🔥{currentStreak}</span>
+              </div>
+
               {/* Days of the month */}
               <div className="grid grid-cols-7 gap-2">
                 {Array.from({ length: daysToAdd }, (_, i) => (
