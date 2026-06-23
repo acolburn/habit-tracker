@@ -48,7 +48,7 @@ function App() {
     const newHabit = {
       id: createHabitId(),
       name: habitName,
-      history: [],
+      history: {},
     };
     setHabits((prev) => [...prev, newHabit]);
   }
@@ -64,12 +64,20 @@ function App() {
         // If this habit doesn't match the habitId, return it unchanged
         if (habit.id !== habitId) return habit;
         // If this habit matches the habitId, toggle the dateKey in its history array
-        // Check if the dateKey is already in the history array
-        const isSelected = habit.history.includes(dateKey);
-        // If the dateKey is already selected, remove it from the history; otherwise, add it
-        const updatedHistory = isSelected
-          ? habit.history.filter((d) => d !== dateKey)
-          : [...habit.history, dateKey];
+        // Read current level for this date
+        const currentLevel = habit.history[dateKey];
+        // Create a new history object to ensure immutability
+        const updatedHistory = { ...habit.history };
+        if (currentLevel === undefined) {
+          // If the dateKey is not in the history, add it with level 1
+          updatedHistory[dateKey] = 1;
+        } else if (currentLevel === 1) {
+          // If the dateKey is already at level 1, increment it to level 2
+          updatedHistory[dateKey] = 2;
+        } else if (currentLevel === 2) {
+          // If the dateKey is already at level 2, remove it from the history
+          delete updatedHistory[dateKey];
+        }
         // Return a new habit object (and set state) with the updated habit.history array
         return { ...habit, history: updatedHistory };
       }),

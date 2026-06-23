@@ -41,9 +41,8 @@ export default function HabitList({
   // Current streak means consecutive days up to today:
   // count today if selected, otherwise start from yesterday.
   function calculateCurrentStreak(history) {
-    const historySet = new Set(history);
     const todayKey = formatDateKey(new Date());
-    const hasToday = historySet.has(todayKey);
+    const hasToday = todayKey in history;
 
     // Build the starting date from a key so we can safely move backward by days.
     const cursorDate = parseDateKey(todayKey);
@@ -54,7 +53,7 @@ export default function HabitList({
     let streakLength = 0;
 
     // Walk backward one day at a time until a date is missing from history.
-    while (historySet.has(formatDateKey(cursorDate))) {
+    while (formatDateKey(cursorDate) in history) {
       streakLength += 1;
       cursorDate.setDate(cursorDate.getDate() - 1);
     }
@@ -74,8 +73,10 @@ export default function HabitList({
         <p className="text-zinc-400 text-center">No habits registered yet</p>
       ) : (
         habits.map((habit) => {
-          const monthlyActivityCount = habit.history.filter((day) =>
-            day.startsWith(monthPrefix),
+          // Count how many days in the current month have a recorded level for this habit
+          // Object.keys(habit.history) gives us all the date keys for this habit's history.
+          const monthlyActivityCount = Object.keys(habit.history).filter(
+            (day) => day.startsWith(monthPrefix),
           ).length;
           const currentStreak = calculateCurrentStreak(habit.history);
 
@@ -102,7 +103,11 @@ export default function HabitList({
                 <span>
                   {`This month: ${monthlyActivityCount}/${daysInMonth}`}
                 </span>
-                <span> Streak: 🔥{currentStreak}</span>
+                <span>
+                  {" "}
+                  Current Streak: {currentStreak > 1 ? "🔥" : ""}
+                  {currentStreak}
+                </span>
               </div>
 
               {/* Days of the month */}
@@ -113,7 +118,9 @@ export default function HabitList({
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
                   (day) => {
                     const dateKey = toDateKey(day);
-                    const isSelected = habit.history.includes(dateKey);
+                    const dayLevel = habit.history[dateKey];
+                    // Determine if the day is selected based on whether dayLevel exists
+                    const isSelected = dayLevel !== undefined;
 
                     return (
                       <button
@@ -123,9 +130,11 @@ export default function HabitList({
                         }}
                         className={
                           "rounded-full px-2 py-1 text-sm " +
-                          (isSelected
-                            ? "bg-violet-700 text-white"
-                            : "bg-zinc-700 text-zinc-200 hover:bg-zinc-600")
+                          (!isSelected
+                            ? "bg-zinc-700 text-zinc-200 hover:bg-zinc-600"
+                            : dayLevel === 1
+                              ? "bg-violet-700 text-white"
+                              : "bg-red-700 text-white")
                         }
                       >
                         {day}
