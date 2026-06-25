@@ -5,7 +5,7 @@ export default function Header({
 }) {
   return (
     <header className="flex items-start justify-between gap-4">
-      <h1 className="text-3xl font-bold">Al&apos;s Habit Tracker</h1>
+      <h1 className="text-3xl font-bold">Habit Tracker</h1>
 
       <div className="flex flex-col items-end">
         <p className="text-zinc-400">{currentlyDisplayedMonthYear}</p>
