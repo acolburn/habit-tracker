@@ -10,8 +10,13 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { db, auth, googleProvider } from "./firebase";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { db, auth } from "./firebase";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 
 const monthNames = [
   "January",
@@ -50,6 +55,10 @@ function App() {
   // });
   const [habits, setHabits] = useState([]);
   const [user, setUser] = useState(null);
+  const [authMode, setAuthMode] = useState("signIn");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
 
   // useEffect(() => {
   //   localStorage.setItem("habitTrackerHabits", JSON.stringify(habits));
@@ -92,12 +101,34 @@ function App() {
   //   setHabits((prev) => [...prev, newHabit]);
   // }
 
-  async function handleSignIn() {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error("Error signing in:", error);
+  async function handleAuthSubmit(event) {
+    event.preventDefault();
+    setAuthError("");
+
+    if (!email.trim() || !password) {
+      setAuthError("Please enter both email and password.");
+      return;
     }
+
+    try {
+      if (authMode === "signIn") {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
+      }
+      setEmail("");
+      setPassword("");
+    } catch (error) {
+      console.error("Error authenticating:", error);
+      setAuthError(error.message || "Authentication failed.");
+    }
+  }
+
+  function toggleAuthMode() {
+    setAuthMode((currentMode) =>
+      currentMode === "signIn" ? "signUp" : "signIn",
+    );
+    setAuthError("");
   }
 
   async function handleSignOut() {
@@ -236,9 +267,7 @@ function App() {
             </button>
           </>
         ) : (
-          <button onClick={handleSignIn} className="border px-3 py-1 rounded">
-            Sign in with Google
-          </button>
+          <div className="w-full" />
         )}
       </div>
 
@@ -259,7 +288,50 @@ function App() {
           />
         </>
       ) : (
-        <p className="text-sm">Please sign in to view your habits.</p>
+        <div className="flex flex-col gap-3 rounded border p-4">
+          <h2 className="text-lg font-semibold">
+            {authMode === "signIn" ? "Sign in" : "Create account"}
+          </h2>
+          <form onSubmit={handleAuthSubmit} className="flex flex-col gap-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Email"
+              className="rounded border px-3 py-2"
+              autoComplete="email"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Password"
+              className="rounded border px-3 py-2"
+              autoComplete={
+                authMode === "signIn" ? "current-password" : "new-password"
+              }
+            />
+            {authError ? (
+              <p className="text-sm text-red-500">{authError}</p>
+            ) : null}
+            <button
+              type="submit"
+              className="rounded bg-violet-800 px-3 py-2 text-white hover:bg-violet-700"
+            >
+              {authMode === "signIn" ? "Sign in with email" : "Create account"}
+            </button>
+            <button
+              type="button"
+              onClick={toggleAuthMode}
+              className="text-sm text-violet-700 underline"
+            >
+              {authMode === "signIn"
+                ? "Need an account? Create one"
+                : "Already have an account? Sign in"}
+            </button>
+          </form>
+          <p className="text-sm">Please sign in to view your habits.</p>
+        </div>
       )}
     </div>
   );
